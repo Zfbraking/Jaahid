@@ -1,0 +1,25 @@
+ Where to Place Each Logic
+1. Invalid Model
+- Placement: Around your LLM initialization and invocation.
+- Why: That’s where model name or API key errors occur.
+- Code spot: In your get_llm() function or safe_invoke() wrapper.
+
+2. Plagiarism Detection
+- Placement: After you get the LLM response, before displaying to the user.
+- Why: You need the generated text to check similarity.
+- Code spot: In your answer post‑processing step (e.g., answer = llm.invoke(...); check_plagiarism(answer.content)).
+
+3. Wrong / Unsupported Data Input
+- Placement: At the file upload / ingestion stage.
+- Why: Stop bad files before they enter your pipeline.
+- Code spot: In your ingest_paper() or build_vector_store() functions, right after reading the file.
+
+4. Malicious Code
+- Placement: Anywhere you accept user code or queries that might be executed.
+- Why: Prevent dangerous functions before execution.
+- Code spot: In your query validation layer (e.g., before passing query into llm.invoke()).
+
+5. Wrong / Sensitive Queries Restriction
+- Placement: At the user input stage (text box, API endpoint).
+- Why: Block unsafe queries before they hit the model.
+- Code spot: In your Streamlit st.text_input handler or API request validator.
