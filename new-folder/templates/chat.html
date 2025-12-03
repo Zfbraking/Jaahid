@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Ask Questions • Agentic RAG</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .chat-page {
+            max-width: 900px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 80px);
+        }
+
+        .chat-window {
+            flex: 1;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: var(--card-shadow);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 6px;
+            margin-bottom: 10px;
+        }
+
+        .chat-bubble {
+            border-radius: 16px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            max-width: 80%;
+            white-space: pre-wrap;
+        }
+
+        .chat-user {
+            background: #dbeafe;
+            align-self: flex-end;
+        }
+
+        .chat-assistant {
+            background: #f3f4f6;
+            align-self: flex-start;
+        }
+
+        .chat-role {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 2px;
+        }
+
+        .chat-input-row {
+            margin-top: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top px-3">
+        <a class="navbar-brand text-white fw-bold" href="/">📊 Agentic RAG</a>
+        <div class="ms-auto">
+            <a href="/" class="nav-link d-inline">Home</a>
+            <a href="/upload" class="nav-link d-inline">Upload File</a>
+            <a href="/query" class="nav-link d-inline active-link">Ask Question</a>
+            <a href="/visuals" class="nav-link d-inline">Visuals</a>
+        </div>
+    </nav>
+
+    <div class="chat-page">
+        <div class="mb-2">
+            <h2 class="mb-1">Chat about your current document</h2>
+            <p class="text-muted mb-0">
+                Ask follow-up questions about the last uploaded PDF or Excel. Upload a new file on the Home page to change the context.
+            </p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <div class="chat-window">
+            <div id="chat-messages" class="d-flex flex-column">
+                {% if history %}
+                    {% for msg in history %}
+                    <div class="d-flex flex-column mb-2 {% if msg.role == 'user' %}align-items-end{% else %}align-items-start{% endif %}">
+                        <div class="chat-role">
+                            {% if msg.role == 'user' %}You{% else %}Assistant{% endif %}
+                        </div>
+                        <div class="chat-bubble {% if msg.role == 'user' %}chat-user{% else %}chat-assistant{% endif %}">
+                            {{ msg.content }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted mb-0">No messages yet. Ask your first question below.</p>
+                {% endif %}
+            </div>
+
+            <form id="chat-form" class="chat-input-row">
+                <div class="input-group">
+                    <input type="text" id="chat-input" class="form-control" placeholder="Ask a question about the document..." required>
+                    <button class="btn btn-primary" type="submit">Send</button>
+                </div>
+                <div id="chat-error" class="text-danger mt-1" style="display:none;"></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='chat.js') }}"></script>
+</body>
+
+</html>

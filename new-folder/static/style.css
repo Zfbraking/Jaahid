@@ -1,0 +1,104 @@
+/* Base */
+:root {
+    --bg: #f4f6f9;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --accent-dark: #1e40af;
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--text);
+}
+
+.navbar .nav-link {
+    color: #fff !important;
+    margin-right: 18px;
+    font-weight: 500;
+}
+
+.navbar .nav-link:hover {
+    color: #93c5fd !important;
+}
+
+.navbar .active-link {
+    color: #60a5fa !important;
+    font-weight: 600;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    background: #fff;
+}
+
+/* Headings */
+h1,
+h2,
+h3 {
+    color: var(--text);
+}
+
+/* Forms and buttons */
+.form-label {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.btn-primary {
+    background: var(--accent);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: var(--accent-dark);
+}
+
+/* Sidebar (dashboard page) */
+.sidebar {
+    min-height: 100vh;
+    border-right: 1px solid #e5e7eb;
+}
+
+/* Chart cards */
+.chart-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.chart-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 14px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.chart-card img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* Utility */
+.badge.bg-light.text-dark {
+    border: 1px solid #e5e7eb;
+}

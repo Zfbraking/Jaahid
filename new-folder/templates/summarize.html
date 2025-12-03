@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Summarize</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="navbar">
+        <a href="/">Home</a>
+        <a href="/visuals">Visuals</a>
+        <a href="/summarize">Summarize</a>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h1>File summarization</h1>
+            <h2>Upload a PDF or Excel, or reuse the last one from Home</h2>
+
+            <form method="post" action="/summarize" enctype="multipart/form-data">
+                <div class="form-row">
+                    <input type="file" name="file" accept=".pdf,.xlsx,.xls">
+                    {% if file_path %}
+                    <p class="text-muted">Using active file: {{ file_path }}</p>
+                    {% endif %}
+                    <input type="text" name="query" placeholder="Ask a question or request a summary" required>
+                    <button type="submit">Summarize</button>
+                </div>
+            </form>
+
+            {% if error %}
+            <div class="error">{{ error }}</div>
+            {% endif %}
+        </div>
+
+        {% if summary %}
+        <div class="card">
+            <h1>Summary</h1>
+            <div style="white-space: pre-wrap;">{{ summary }}</div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+</html>

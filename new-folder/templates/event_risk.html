@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Event Risk Forecast • Agentic RAG</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top px-3">
+        <a class="navbar-brand text-white fw-bold" href="/">📊 Agentic RAG</a>
+        <div class="ms-auto d-flex align-items-center">
+            <a href="/" class="nav-link text-white">Home</a>
+            <a href="/upload" class="nav-link text-white">Upload File</a>
+            <a href="/query" class="nav-link text-white">Ask Question</a>
+            <a href="/visuals" class="nav-link text-white">Visuals</a>
+            <a href="/ml" class="nav-link text-white">ML</a>
+            <a href="/req2tc" class="nav-link text-white">Req → TC</a>
+            <!-- EVENT RISK NAV LINK -->
+            <a href="/event_risk" class="nav-link text-white active-link">Event Risk</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        {% if status_message %}
+        <div class="alert alert-success">{{ status_message }}</div>
+        {% endif %}
+
+        <div class="row g-4">
+            <!-- Index logs -->
+            <div class="col-md-4">
+                <div class="card p-4">
+                    <h4 class="mb-3">1️⃣ Index log data</h4>
+                    {% if not file_path %}
+                    <p class="text-muted">
+                        No log file detected. Please upload a CSV/Excel log file on the Home page first.
+                    </p>
+                    {% else %}
+                    <p class="text-muted">
+                        Using log file: <code>{{ file_path }}</code>
+                    </p>
+                    <form method="post">
+                        <input type="hidden" name="action" value="index">
+                        <button type="submit" class="btn btn-primary">Index for risk forecasting</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Forecast -->
+            <div class="col-md-8">
+                <div class="card p-4">
+                    <h4 class="mb-3">2️⃣ Forecast event risk</h4>
+                    <form method="post">
+                        <input type="hidden" name="action" value="forecast">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Dimension</label>
+                                <select name="dimension" class="form-select" required>
+                                    <option value="">-- Select --</option>
+                                    <option value="severity">severity</option>
+                                    <option value="service">service</option>
+                                    <option value="error_code">error_code</option>
+                                    <option value="message">message</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Value</label>
+                                <select name="value" class="form-select" required>
+                                    <option value="">-- Choose from options or type manually --</option>
+                                    {% for val in options.severity %}
+                                    <option value="{{ val }}">severity: {{ val }}</option>
+                                    {% endfor %}
+                                    {% for val in options.service %}
+                                    <option value="{{ val }}">service: {{ val }}</option>
+                                    {% endfor %}
+                                    {% for val in options.error_code %}
+                                    <option value="{{ val }}">error_code: {{ val }}</option>
+                                    {% endfor %}
+                                    {% for val in options.message %}
+                                    <option value="{{ val }}">message: {{ val }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted d-block mt-1">
+                                    If your desired value is not in the list, you can still type it directly here by
+                                    editing the field.
+                                </small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Window</label>
+                                <select name="window" class="form-select" required>
+                                    <option value="day">Tomorrow (1 day)</option>
+                                    <option value="week">Next 7 days</option>
+                                    <option value="month">Next 30 days</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success mt-3">Forecast</button>
+                    </form>
+
+                    {% if forecast %}
+                    <hr>
+                    <h5>Forecast result</h5>
+                    <p class="mb-1">
+                        <strong>Dimension:</strong> {{ forecast.dimension }} &nbsp;
+                        <strong>Value:</strong> {{ forecast.value }} &nbsp;
+                        <strong>Window:</strong>
+                        {% if forecast.window == 'day' %}Tomorrow{% elif forecast.window == 'week' %}Next 7 days{% else
+                        %}Next 30 days{% endif %}
+                    </p>
+                    <p class="mb-1">
+                        <strong>Expected count:</strong>
+                        {{ forecast.expected_count | round(2) }}
+                    </p>
+                    <p class="mb-1">
+                        <strong>Probability of at least one event:</strong>
+                        {{ (forecast.probability_at_least_one * 100) | round(1) }}%
+                    </p>
+                    <p class="text-muted mb-0">
+                        Based on {{ forecast.total_events_for_value }} past matching events over
+                        {{ forecast.total_days_observed }} observed days.
+                    </p>
+
+                    <details class="mt-3">
+                        <summary>Raw details</summary>
+                        <pre style="white-space: pre-wrap;">{{ forecast | tojson(indent=2) }}</pre>
+                    </details>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
