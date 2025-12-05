@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Risk & Criticality Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-dark bg-dark px-3">
+        <a href="/" class="navbar-brand fw-bold">📊 Transition Suite</a>
+        <div class="ms-auto d-flex">
+            <a href="/" class="nav-link text-white">Main Dashboard</a>
+            <a href="/smart" class="nav-link text-white fw-semibold">Risk View</a>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+
+        <!-- Upload Panel -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h4 class="mb-3">Upload Transition / Risk Excel</h4>
+
+                <form method="post" enctype="multipart/form-data">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-6">
+                            <label class="form-label">File</label>
+                            <input type="file" name="file" class="form-control" accept=".xlsx,.xls,.csv" required>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-danger w-100">
+                                Analyze Risks
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if file_name %}
+                <p class="mt-2 text-muted mb-0">
+                    Loaded file: <strong>{{ file_name }}</strong>
+                </p>
+                {% endif %}
+
+                {% if error %}
+                <div class="alert alert-warning mt-3 mb-0">
+                    {{ error }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- KPI CARDS (Risk focused) -->
+        {% if kpis %}
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="text-muted small">Total Risk Items</div>
+                        <div class="h4 mb-0">{{ kpis.total_risks }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="text-muted small">High Risks</div>
+                        <div class="h4 mb-0 text-danger">{{ kpis.high_risks }}</div>
+                        {% if kpis.critical_risks > 0 %}
+                        <div class="small text-danger">
+                            Critical: {{ kpis.critical_risks }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="text-muted small">Medium Risks</div>
+                        <div class="h4 mb-0 text-warning">{{ kpis.medium_risks }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="text-muted small">Low Risks</div>
+                        <div class="h4 mb-0 text-success">{{ kpis.low_risks }}</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FIRST ROW: Left = horizontal risk; Right = application stacked bar -->
+        <div class="row g-3 mb-4">
+            <!-- Left: horizontal risk distribution -->
+            <div class="col-md-6">
+                <div class="card mb-3 shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <h5 class="mb-3">Risk Distribution Overview</h5>
+
+                        {% set total = kpis.total_risks if kpis.total_risks else 1 %}
+                        {% set high_pct = (kpis.high_risks * 100) // total %}
+                        {% set med_pct = (kpis.medium_risks * 100) // total %}
+                        {% set low_pct = (kpis.low_risks * 100) // total %}
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span class="small fw-semibold text-danger">High</span>
+                                <span class="small text-muted">{{ kpis.high_risks }} ({{ high_pct }}%)</span>
+                            </div>
+                            <div class="progress" style="height: 18px;">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: {{ high_pct }}%;"
+                                    aria-valuenow="{{ high_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span class="small fw-semibold text-warning">Medium</span>
+                                <span class="small text-muted">{{ kpis.medium_risks }} ({{ med_pct }}%)</span>
+                            </div>
+                            <div class="progress" style="height: 18px;">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ med_pct }}%;"
+                                    aria-valuenow="{{ med_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="d-flex justify-content-between">
+                                <span class="small fw-semibold text-success">Low</span>
+                                <span class="small text-muted">{{ kpis.low_risks }} ({{ low_pct }}%)</span>
+                            </div>
+                            <div class="progress" style="height: 18px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ low_pct }}%;"
+                                    aria-valuenow="{{ low_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: application stacked bar breakdown -->
+            <div class="col-md-6">
+                <div class="card mb-3 shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <h5 class="mb-3">Application Risk Breakdown</h5>
+                        <small class="text-muted d-block mb-2">
+                            Stacked High / Medium / Low for each application (top 10 by total risks)
+                        </small>
+
+                        {% if app_risk_breakdown %}
+                        {% for app in app_risk_breakdown %}
+                        {% set total_app = app.total if app.total else 1 %}
+                        {% set high_pct_app = (app.high * 100) // total_app %}
+                        {% set med_pct_app = (app.medium * 100) // total_app %}
+                        {% set low_pct_app = (app.low * 100) // total_app %}
+
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span class="small fw-semibold">{{ app.application }}</span>
+                                <span class="small text-muted">
+                                    H: {{ app.high }} · M: {{ app.medium }} · L: {{ app.low }}
+                                </span>
+                            </div>
+                            <div class="progress" style="height: 16px;">
+                                <div class="progress-bar bg-danger" role="progressbar"
+                                    style="width: {{ high_pct_app }}%;" aria-valuenow="{{ high_pct_app }}"
+                                    aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar bg-warning" role="progressbar"
+                                    style="width: {{ med_pct_app }}%;" aria-valuenow="{{ med_pct_app }}"
+                                    aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar bg-success" role="progressbar"
+                                    style="width: {{ low_pct_app }}%;" aria-valuenow="{{ low_pct_app }}"
+                                    aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <p class="text-muted mb-0">
+                            No application column detected or no risk data by application.
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- SECOND ROW: Criticality pie, Risk item bar, Status chart -->
+        {% if global_charts %}
+        <div class="row g-3 mb-4">
+
+            {% if global_charts.criticality %}
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header py-2">
+                        <small class="fw-semibold">
+                            {{ global_charts.criticality.title }}
+                        </small>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="data:image/png;base64,{{ global_charts.criticality.chart }}"
+                            class="img-fluid rounded border" alt="{{ global_charts.criticality.title }}">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if global_charts.risk_item %}
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header py-2">
+                        <small class="fw-semibold">
+                            {{ global_charts.risk_item.title }}
+                        </small>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="data:image/png;base64,{{ global_charts.risk_item.chart }}"
+                            class="img-fluid rounded border" alt="{{ global_charts.risk_item.title }}">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if global_charts.status %}
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header py-2">
+                        <small class="fw-semibold">
+                            {{ global_charts.status.title }}
+                        </small>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="data:image/png;base64,{{ global_charts.status.chart }}"
+                            class="img-fluid rounded border" alt="{{ global_charts.status.title }}">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+        {% endif %}
+
+        <!-- GROUPED RISK CHARTS (by group_column) -->
+        {% if charts %}
+        {% for grp in charts %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">
+                        {% if group_column %}
+                        {{ group_column }}: {{ grp.group_value }}
+                        {% else %}
+                        Group: {{ grp.group_value }}
+                        {% endif %}
+                    </h5>
+                    <small class="text-muted">
+                        Risk &amp; criticality distribution for this group
+                    </small>
+                </div>
+            </div>
+
+            <div class="card-body">
+                {% if grp.charts %}
+                <div class="row g-4">
+                    {% for chart in grp.charts %}
+                    <div class="col-md-4 text-center">
+                        <div class="card h-100 border-0">
+                            <div class="card-header py-2">
+                                <small class="fw-semibold">
+                                    {{ chart.column }}
+                                    ({{ chart.chart_type|capitalize }})
+                                </small>
+                            </div>
+                            <div class="card-body">
+                                <img src="data:image/png;base64,{{ chart.chart }}" class="img-fluid rounded border"
+                                    alt="{{ chart.title }}">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No risk/criticality columns detected for this group.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if not charts and not kpis %}
+        <p class="text-muted">
+            Upload a transition / risk Excel to see risk &amp; criticality insights.
+        </p>
+        {% endif %}
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
